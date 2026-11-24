@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoSom SUS · Painel do projeto</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#e9eef2; --surface:#fcfcfb; --surface2:#f3f6f8;
+  --ink:#0b2230; --ink2:#43586a; --muted:#566977;
+  --line:#d6dee5; --grid:#e4eaef;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --hero-bg:#0b2230; --hero-ink:#f2f7fa; --hero-mut:#a9bcc8; --hero-card:rgba(255,255,255,.07); --hero-line:rgba(255,255,255,.16); --wave:#5fd0c9;
+  --good:#0b7a45; --warn:#9a5b00; --bad:#b3261e; --accent:#0f6d73;
+  --shadow:0 1px 0 rgba(11,34,48,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --bg:#0c1216; --surface:#1a1a19; --surface2:#222321;
+    --ink:#eef2f4; --ink2:#bcc7ce; --muted:#9aa8b1;
+    --line:#2f3436; --grid:#2a2d2e;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --hero-bg:#10222d; --accent:#5fc7c0;
+    --good:#4cc78a; --warn:#e0a54a; --bad:#ef7b73;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0c1216; --surface:#1a1a19; --surface2:#222321;
+  --ink:#eef2f4; --ink2:#bcc7ce; --muted:#9aa8b1;
+  --line:#2f3436; --grid:#2a2d2e;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --hero-bg:#10222d; --accent:#5fc7c0;
+  --good:#4cc78a; --warn:#e0a54a; --bad:#ef7b73;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* topo */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600}
+.brand svg{flex:none}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-size:13.5px}
+.btn:hover{border-color:var(--ink2)}
+
+/* hero */
+.hero{background:var(--hero-bg);color:var(--hero-ink);border-radius:20px;position:relative;overflow:hidden;padding:36px 36px 140px;margin-bottom:16px}
+.hero h1{margin:0;font-size:clamp(34px,5vw,56px);line-height:1.05;letter-spacing:-.01em;font-weight:700}
+.hero .sub{margin:8px 0 0;color:var(--hero-mut);font-size:clamp(15px,1.6vw,18px);max-width:46ch}
+.hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;position:relative;z-index:1}
+.objetivo{margin:26px 0 0;font-size:clamp(19px,2.2vw,25px);line-height:1.38;max-width:34ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{border:1px solid var(--hero-line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--hero-mut)}
+.trilha{background:var(--hero-card);border:1px solid var(--hero-line);border-radius:14px;padding:6px 18px}
+.trilha h2{font-size:15px;margin:14px 0 4px;font-weight:600}
+.faixa{display:grid;grid-template-columns:14px 1fr;gap:4px 12px;padding:14px 0;border-top:1px solid var(--hero-line)}
+.faixa:first-of-type{border-top:0}
+.faixa i{width:10px;height:10px;border-radius:3px;margin-top:6px;display:block}
+.faixa b{font-weight:600}
+.faixa p{margin:0;color:var(--hero-mut);font-size:14px;grid-column:2}
+.faixa .ent{grid-column:2;font-size:13.5px;color:var(--hero-ink)}
+.wave{position:absolute;left:0;right:0;bottom:0;height:96px;display:block;width:100%}
+.wave-cap{position:absolute;left:36px;bottom:104px;font-size:12px;color:var(--hero-mut);z-index:2}
+
+/* filtros */
+.filters{position:sticky;top:0;z-index:30;background:var(--bg);padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.fgrid{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:3px;min-width:130px}
+.f label{font-size:12.5px;color:var(--ink2)}
+.f select{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 28px 7px 10px;min-height:38px;appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink2) 50%),linear-gradient(135deg,var(--ink2) 50%,transparent 50%);background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.f .pair{display:flex;gap:6px;align-items:center}
+.fnote{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.c5{grid-column:span 5}.c7{grid-column:span 7}.c4{grid-column:span 4}.c3{grid-column:span 3}.c12{grid-column:span 12}.c6{grid-column:span 6}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;box-shadow:var(--shadow);min-width:0}
+.card[hidden],.kpi[hidden]{display:none}
+.card h3{margin:0;font-size:18px;line-height:1.25;font-weight:700}
+.card .sub{margin:4px 0 12px;color:var(--ink2);font-size:13.5px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--k,var(--accent));border-radius:12px;padding:14px 16px}
+.kpi .l{font-size:13px;color:var(--ink2)}
+.kpi .v{font-size:clamp(28px,3vw,36px);font-weight:700;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .v small{font-size:.5em;font-weight:600;color:var(--ink2);margin-left:2px}
+.kpi .d{font-size:13px;color:var(--ink2)}
+.kpi .d b{color:var(--ink)}
+.chart{width:100%;position:relative}
+.chart svg{display:block;max-width:100%;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend .dash{background:transparent;border:2px dashed var(--s2)}
+.legend .tick{width:2px;height:12px;background:var(--ink);border-radius:0}
+.legend b{color:var(--ink);font-variant-numeric:tabular-nums}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+
+/* tooltip */
+#tip{position:fixed;left:0;top:0;z-index:100;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--ink2);border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.4;max-width:290px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+#tip[hidden]{display:none}
+#tip b{font-weight:700}
+#tip .m{color:var(--ink2);font-size:12px}
+#tip .row{display:flex;align-items:center;gap:7px;margin-top:3px}
+#tip .row i{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+
+/* insights */
+.ins{display:grid;gap:0}
+.in{padding:14px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.in:first-child{border-top:0;padding-top:4px}
+.in .tag{grid-row:span 2;align-self:start;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap;color:var(--ink2);margin-top:2px}
+.in .tag.lac{color:var(--warn);border-color:var(--warn)}
+.in h4{margin:0;font-size:16px;line-height:1.35;font-weight:650}
+.in p{margin:0;color:var(--ink2);font-size:14px}
+.in .src{font-size:12.5px;color:var(--muted)}
+
+/* prontidão */
+.st{width:100%;border-collapse:collapse;font-size:13.5px}
+.st td{padding:9px 6px;border-top:1px solid var(--line);vertical-align:top}
+.st tr:first-child td{border-top:0}
+.pill{display:inline-flex;gap:6px;align-items:center;font-weight:600;font-size:12.5px;white-space:nowrap}
+.pill.ok{color:var(--good)}.pill.parc{color:var(--warn)}.pill.no{color:var(--bad)}
+.st .why{color:var(--ink2);display:block;font-size:12.5px}
+
+/* import */
+.drop{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 14px}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--ink2);background:var(--surface2)}
+.empty b{color:var(--ink)}
+.empty code,.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--bg);padding:1px 6px;border-radius:5px}
+.err{color:var(--bad);font-size:13.5px;margin:6px 0 0}
+
+/* tabela */
+details.card summary{cursor:pointer;font-weight:700;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary span{font-weight:500;font-size:13px;color:var(--ink2)}
+.tw{overflow:auto;max-height:460px;margin-top:12px;border:1px solid var(--line);border-radius:10px}
+.tb{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+.tb th{position:sticky;top:0;background:var(--surface2);text-align:left;padding:8px 10px;font-weight:600;border-bottom:1px solid var(--line)}
+.tb td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top}
+.tb td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tp{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;white-space:nowrap}
+footer{color:var(--ink2);font-size:13px;padding:8px 0 40px}
+footer p{margin:6px 0;max-width:110ch}
+
+@media (max-width:1020px){
+  .hero-grid{grid-template-columns:1fr;gap:24px}
+  .c5,.c7,.c4,.c3,.c6{grid-column:span 12}
+  .hero{padding:26px 22px 110px}
+  .wave-cap{left:22px}
+}
+@media (max-width:700px){
+  .wrap{padding:0 14px}
+  .filters{position:static}
+  .f{min-width:calc(50% - 7px);flex:1 1 calc(50% - 7px)}
+  .f.wide{flex-basis:100%}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px}
+  .card{padding:14px}
+  .in{grid-template-columns:1fr}
+  .in .tag{grid-row:auto;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{.filters,.btn{display:none}body{background:#fff}}
+
+/* ---------- revisão visual: interface mais leve ---------- */
+:root{
+  --bg:#f5f7f8;
+  --surface:#ffffff;
+  --surface2:#f2f6f6;
+  --ink:#18313b;
+  --ink2:#536871;
+  --muted:#697b82;
+  --line:#e1e8e9;
+  --grid:#e9eeee;
+  --s1:#3979a8;
+  --s2:#d8794e;
+  --s3:#398b75;
+  --hero-bg:#e8f1f0;
+  --hero-ink:#18313b;
+  --hero-mut:#536871;
+  --hero-card:rgba(255,255,255,.72);
+  --hero-line:#d4e2df;
+  --wave:#78b9ae;
+  --accent:#347d78;
+  --shadow:0 2px 12px rgba(24,49,59,.035);
+}
+:root[data-theme="dark"]{
+  --bg:#11191d;
+  --surface:#1a252a;
+  --surface2:#202e33;
+  --ink:#edf3f3;
+  --ink2:#b7c6c9;
+  --muted:#91a3a8;
+  --line:#304047;
+  --grid:#2b3940;
+  --s1:#6fa9d2;
+  --s2:#e4936d;
+  --s3:#69b69d;
+  --hero-bg:#1b3034;
+  --hero-ink:#edf3f3;
+  --hero-mut:#b7c6c9;
+  --hero-card:rgba(255,255,255,.045);
+  --hero-line:rgba(255,255,255,.13);
+  --accent:#78c5b9;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])){
+    --bg:#11191d;
+    --surface:#1a252a;
+    --surface2:#202e33;
+    --ink:#edf3f3;
+    --ink2:#b7c6c9;
+    --muted:#91a3a8;
+    --line:#304047;
+    --grid:#2b3940;
+    --s1:#6fa9d2;
+    --s2:#e4936d;
+    --s3:#69b69d;
+    --hero-bg:#1b3034;
+    --hero-ink:#edf3f3;
+    --hero-mut:#b7c6c9;
+    --hero-card:rgba(255,255,255,.045);
+    --hero-line:rgba(255,255,255,.13);
+    --accent:#78c5b9;
+  }
+}
+body{line-height:1.55}
+.wrap{max-width:1180px;padding-left:22px;padding-right:22px}
+.bar{padding:12px 0}
+.brand{font-size:14px;letter-spacing:.01em}
+.hero{
+  border-radius:16px;
+  padding:30px 30px 38px;
+  margin-bottom:14px;
+  background:var(--hero-bg);
+  border:1px solid var(--hero-line);
+}
+.hero h1{font-size:clamp(32px,4.5vw,48px);letter-spacing:-.025em}
+.hero .sub{max-width:58ch}
+.objetivo{font-family:inherit;font-size:clamp(17px,1.8vw,21px);max-width:52ch;margin-top:20px}
+.chips{margin-top:18px}
+.chip{color:var(--hero-mut);border-color:var(--hero-line)}
+.trilha{border-radius:12px;padding:8px 16px;background:var(--hero-card)}
+.trilha h2{margin-top:10px}
+.faixa{padding:11px 0}
+.wave,.wave-cap{display:none!important}
+.filters{
+  position:static;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:14px;
+  background:var(--surface);
+}
+.fgrid{gap:9px 12px}
+.f{min-width:125px}
+.f label{font-size:12px}
+.f select{border-radius:8px;min-height:36px}
+.btn{border-radius:9px;padding:7px 12px}
+.btn:hover{background:var(--surface2)}
+.kpis{gap:11px;margin-bottom:14px}
+.kpi{border:1px solid var(--line);border-top:2px solid var(--k,var(--accent));border-radius:11px;padding:13px 14px}
+.kpi .v{font-size:clamp(25px,2.7vw,32px)}
+.grid{gap:12px;margin-bottom:12px}
+.card{border-radius:12px;padding:16px;box-shadow:none}
+.card h3{font-size:17px}
+.card .sub{margin-bottom:9px}
+.legend{gap:6px 12px;font-size:12px}
+.note,.fnote{font-size:12px}
+.in{padding:12px 0;gap:4px 11px}
+.in h4{font-size:15px}
+.in p{font-size:13.5px;line-height:1.5}
+.in .tag{font-size:11px}
+.st{font-size:13px}
+.st td{padding:8px 5px}
+.tw{max-height:420px}
+.tb{font-size:12.5px}
+footer{padding-top:14px}
+footer p{max-width:100ch}
+.empty{border-radius:10px}
+@media(max-width:700px){
+  .wrap{padding:0 12px}
+  .hero{padding:22px 18px;border-radius:12px}
+  .hero-grid{gap:16px}
+  .objetivo{font-size:17px}
+  .filters{padding:10px}
+  .kpis{gap:8px}
+  .kpi{padding:10px}
+  .card{padding:13px}
+}
+@media print{
+  .hero{background:#edf3f2!important;color:#18313b!important}
+  .hero .sub,.hero .objetivo,.hero .chip,.trilha p{color:#536871!important}
+  .trilha{background:#fff!important;border-color:#d4e2df!important}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" style="fill:var(--hero-bg)"/><g style="fill:#5fd0c9"><rect x="5" y="10" width="2.6" height="8" rx="1.3"/><rect x="9.6" y="6" width="2.6" height="16" rx="1.3"/><rect x="14.2" y="9" width="2.6" height="10" rx="1.3"/><rect x="18.8" y="12" width="2.6" height="4" rx="1.3"/></g></svg>
+      <span>EcoSom SUS <span style="font-weight:400;color:var(--ink2)">· Projeto Integrado FMU Tech Inovação 2026.2</span></span>
+    </div>
+    <button class="btn" id="theme" type="button" aria-pressed="false"><span id="themeIco" aria-hidden="true">◐</span><span id="themeTxt">Tema escuro</span></button>
+  </div>
+
+  <header class="hero" id="topo">
+    <div class="hero-grid">
+      <div>
+        <h1 class="serif">EcoSom SUS</h1>
+        <p class="sub">Painel de indicadores sobre ruído urbano, saúde e acessibilidade</p>
+        <p class="objetivo serif">Organizar dados públicos sobre ruído urbano, saúde e acessibilidade para apoiar ações de prevenção, planejamento urbano e deslocamentos mais acolhedores em São Paulo.</p>
+        <p class="note" style="color:var(--hero-mut);max-width:58ch;margin-top:12px">Painel exploratório: reúne indicadores de fontes distintas. As associações apresentadas não demonstram, por si só, relação causal nem representam avaliação clínica individual.</p>
+        <div class="chips"><span class="chip">ODS 3 · Meta 3.9</span><span class="chip">Aplicação web (PWA)</span><span class="chip">Dados abertos: GeoSampa, DataSUS, CNES</span></div>
+      </div>
+      <div class="trilha">
+        <h2>Do problema às aplicações</h2>
+        <div class="faixa"><i style="background:#3987e5"></i><b>Longo prazo</b><p>Sono fragmentado e cortisol elevado aumentam o risco de hipertensão, infarto e AVC.</p><span class="ent">Módulo 1: Score de Risco Acústico e Plano de Blindagem Noturna</span></div>
+        <div class="faixa"><i style="background:#eb6834"></i><b>Curto prazo</b><p>O excesso de ruído pode provocar sobrecarga sensorial em pessoas com TEA.</p><span class="ent">Módulo 2: rotas de menor ruído e refúgios de descompressão</span></div>
+        <div class="faixa"><i style="background:#1baf7a"></i><b>Visão pública</b><p>Cruza a distribuição do ruído com as internações do DataSUS.</p><span class="ent">Painel analítico para gestores e associações de bairro</span></div>
+      </div>
+    </div>
+    <svg class="wave" id="wave" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="wave-cap">Do ruído ao descanso</div>
+  </header>
+
+  <section class="filters" aria-label="Filtros">
+    <div class="fgrid">
+      <div class="f wide"><label for="fEixo">Eixo temático</label>
+        <select id="fEixo"><option value="all">Todos os eixos</option><option value="cardio">Coração e sono</option><option value="tea">TEA e acessibilidade</option><option value="ruido">Ruído e referências</option><option value="rede">Rede SUS</option></select></div>
+      <div class="f"><label for="fDe">Período</label>
+        <div class="pair"><select id="fDe" aria-label="Ano inicial"></select><span aria-hidden="true">a</span><select id="fAte" aria-label="Ano final"></select></div></div>
+      <div class="f"><label for="fReg">Região (Censo 2022)</label>
+        <select id="fReg"><option value="all">Brasil</option></select></div>
+      <div class="f"><label for="fSex">Sexo (Censo 2022)</label>
+        <select id="fSex"><option value="all">Todos</option><option value="H">Homens</option><option value="M">Mulheres</option></select></div>
+      <div class="f"><label for="fFaixa">Faixa acústica</label>
+        <select id="fFaixa"><option value="all">Dia e noite</option><option value="dia">Dia (Lden)</option><option value="noite">Noite (Lnight)</option></select></div>
+      <button class="btn" id="reset" type="button">Limpar filtros</button>
+    </div>
+    <p class="fnote" id="fnote">O Censo 2022 não cruza sexo com região nesta fonte: escolher um recorte zera o outro. O período vale para a pesquisa ISA Capital (2003, 2008, 2015, 2024) e para a rede de saúde (2016, 2025, 2026). Não há dado de hipertensão para 2025 e 2026.</p>
+  </section>
+
+  <main>
+    <section class="kpis" id="kpis" aria-label="Indicadores principais"></section>
+
+    <div class="grid">
+      <section class="card c7" data-eixo="cardio"><h3 class="serif">Hipertensão e diabetes crescem entre adultos da capital</h3><p class="sub" id="subIsa"></p><div class="chart" id="chIsa"></div><div class="legend" id="lgIsa"></div></section>
+      <section class="card c5" data-eixo="cardio"><h3 class="serif">Infarto e AVC: pessoas internadas</h3><p class="sub">Capital paulista, janeiro de 2023 a julho de 2025.</p><div class="chart" id="chUrg"></div><div class="legend" id="lgUrg"></div></section>
+    </div>
+
+    <div class="grid">
+      <section class="card c7" data-eixo="ruido"><h3 class="serif">Níveis de ruído: referências e estudo do Minhocão</h3><p class="sub" id="subRuido"></p><div class="chart" id="chRuido"></div><div class="legend" id="lgRuido"></div><p class="note">Normas e medições usam métricas diferentes (Lden, Lnight, LAeq). A comparação é indicativa, não regulatória.</p></section>
+      <section class="card c5" data-eixo="rede"><h3 class="serif">Rede municipal de saúde</h3><p class="sub" id="subRede"></p><div class="chart" id="chRede"></div><div class="legend"><span><i class="tick"></i>valor de 2016, quando informado</span></div></section>
+    </div>
+
+    <div class="grid">
+      <section class="card c5" data-eixo="tea"><h3 class="serif">Autismo por faixa etária</h3><p class="sub" id="subIdade"></p><div class="chart" id="chIdade"></div><div class="legend" id="lgIdade"></div></section>
+      <section class="card c4" data-eixo="tea"><h3 class="serif">Autismo por região</h3><p class="sub" id="subReg"></p><div class="chart" id="chReg"></div></section>
+      <section class="card c3" data-eixo="tea"><h3 class="serif">Por sexo</h3><p class="sub" id="subSexo"></p><div class="chart" id="chSexo"></div><div class="legend" id="lgSexo"></div></section>
+    </div>
+
+    <div class="grid">
+      <section class="card c7"><h3 class="serif">O que os dados já dizem</h3><p class="sub">Cinco achados da análise exploratória. Cada um aponta sua fonte.</p><div class="ins" id="ins"></div></section>
+      <section class="card c5"><h3 class="serif">Prontidão dos dados</h3><p class="sub">O que já alimenta o painel e o que ainda falta.</p><table class="st" id="pront"></table></section>
+    </div>
+
+    <div class="grid">
+      <section class="card c12" data-eixo="cardio" id="cdist"><h3 class="serif">Internações por distrito (DataSUS): aguardando carga</h3>
+        <p class="sub">Esta é a futura "visão pública" do projeto: mostrar quais distritos têm mais internações por hipertensão e infarto, para cruzar com a mancha de ruído. Ainda não há dados por distrito aqui, e nenhum valor foi inventado. Se você obtiver a base, importe o CSV e o gráfico aparece.</p>
+        <div class="drop"><input type="file" id="csv" accept=".csv,text/csv,.txt" class="sr"><button class="btn" id="csvBtn" type="button">Importar CSV</button><button class="btn" id="csvModelo" type="button">Baixar modelo (só cabeçalho)</button>
+          <div class="f" style="min-width:150px"><label for="fMed" class="sr">Medida</label><select id="fMed"><option value="hipertensao">Hipertensão essencial</option><option value="iam">Infarto agudo do miocárdio</option></select></div></div>
+        <div id="dist"><div class="empty"><b>Nenhum dado carregado.</b> Atenção: o TABNET público do SIH/SUS da capital traz o município de residência, e o distrito que aparece é o do estabelecimento de saúde, não o de moradia. Para o cruzamento com o ruído, o ideal é o distrito de residência (obtido dos microdados do SIH, pelo CEP, ou por pedido à Secretaria Municipal da Saúde). Com a base em mãos, salve as colunas <span class="code">distrito;hipertensao;iam</span> (CID I10 e I21) e importe aqui. Os dados ficam só no seu navegador.</div></div>
+      </section>
+    </div>
+
+    <details class="card" id="cat">
+      <summary>Catálogo de dados e fontes <span id="catN"></span></summary>
+      <p class="sub" style="margin-top:8px">Todo número do painel está nesta tabela, com período, fonte e tipo (documento, público ou derivado).</p>
+      <div class="drop"><button class="btn" id="catCsv" type="button">Baixar catálogo em CSV</button></div>
+      <div class="tw"><table class="tb" id="catT"></table></div>
+    </details>
+  </main>
+
+  <footer>
+    <p>Nenhum valor foi estimado. Números derivados (somas, médias e variações) estão marcados como tal e mostram o cálculo no catálogo.</p>
+    <p>Fontes: documento do projeto; OMS (2018); ABNT NBR 10.151 (2019); ISA Capital 2024 (SMS-SP e FSP-USP); SMS-SP (2025 e ago/2026); Vigitel 2006–2024 (Ministério da Saúde); IBGE, Censo 2022; SMDU e Pro Acústica (2019).</p>
+  </footer>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+const D = {"isa": {"anos": [2003, 2008, 2015, 2024], "hipertensao": [17.0, 21.7, 23.2, 26.3], "diabetes": [4.7, 6.4, 7.7, 11.0], "hip60": 58.5, "dia60": 28.2, "amostra": 5472}, "rede": {"anos": [2016, 2025, 2026], "prelim": [false, false, true], "UBS": [451, 479, 484], "CAPS": [null, 103, 105], "UPA": [3, 34, 35], "HOSP": [null, 27, 26], "total": [null, 1056, 1064]}, "urg": {"iam": 13800, "avc": 9394, "trIam": 4428, "trAvc": 1306, "meses": 31}, "tea": {"total": 2400000, "pct": 1.2, "sexo": {"H": {"n": 1400000, "p": 1.5}, "M": {"n": 1000000, "p": 0.9}}, "idade": [{"f": "0–4", "t": 2.1, "H": 2.9, "M": 1.2}, {"f": "5–9", "t": 2.6, "H": 3.8, "M": 1.3}, {"f": "10–14", "t": 1.9, "H": null, "M": null}, {"f": "15–19", "t": 1.3, "H": null, "M": null}], "demais": [0.8, 1.0], "n0a19": 1100000, "regiao": [{"k": "Sudeste", "n": 1000000, "p": 1.2, "aprox": true}, {"k": "Nordeste", "n": 633000, "p": 1.2}, {"k": "Sul", "n": 348400, "p": 1.2}, {"k": "Norte", "n": 202000, "p": 1.2}, {"k": "Centro-Oeste", "n": 180000, "p": 1.1}]}, "ruido": [{"id": "oms_n", "label": "OMS · limite noturno (Lnight)", "lo": 45, "hi": 45, "per": "noite", "tipo": "referência", "fonte": "OMS Europa, Environmental Noise Guidelines (2018) via QMUL/ISGlobal"}, {"id": "nbr_n", "label": "NBR 10.151 · noite, área mista residencial", "lo": 50, "hi": 50, "per": "noite", "tipo": "referência", "fonte": "ABNT NBR 10.151:2019 via Pesquisa FAPESP nº 341 (jul/2024)"}, {"id": "oms_d", "label": "OMS · limite médio (Lden)", "lo": 53, "hi": 53, "per": "dia", "tipo": "referência", "fonte": "OMS Europa, Environmental Noise Guidelines (2018) via QMUL/ISGlobal"}, {"id": "nbr_d", "label": "NBR 10.151 · dia, área mista residencial", "lo": 55, "hi": 55, "per": "dia", "tipo": "referência", "fonte": "ABNT NBR 10.151:2019 via Pesquisa FAPESP nº 341 (jul/2024)"}, {"id": "oms_r", "label": "OMS · nível com +5% de risco cardíaco", "lo": 59.3, "hi": 59.3, "per": "dia", "tipo": "referência", "fonte": "OMS Europa, Environmental Noise Guidelines (2018) via QMUL/ISGlobal"}, {"id": "min_f", "label": "Minhocão · via fechada (estimado)", "lo": 59, "hi": 70, "per": "ambos", "tipo": "estimado", "fonte": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP"}, {"id": "min_a", "label": "Minhocão · via aberta (medido)", "lo": 69, "hi": 76, "per": "ambos", "tipo": "medido", "fonte": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP"}], "anosFiltro": [2003, 2008, 2015, 2016, 2024, 2025, 2026], "derivados": {"hip_var_pp": 9.3, "hip_var_pct": 54.7, "dia_var_pp": 6.3, "dia_var_pct": 134.0, "hip60_x": 2.22, "urg_total": 23194, "urg_mes": 748, "iam_share": 59.5, "avc_share": 40.5, "tr_iam_pct": 32.1, "tea_0a19_pct": 46, "tea_boy_girl_5_9": 2.9, "tea_boy_girl_0_4": 2.4, "tea_5_9_vs_adult_lo": 2.6, "tea_5_9_vs_adult_hi": 3.2, "ubs_var": 33, "ubs_var_pct": 7.3, "upa_x": 11.7, "mino_acima_lo": 16, "mino_acima_hi": 23, "meses_check": 31}, "fontes": {"doc": "Resumo Executivo EcoSom SUS (FMU 2026.2)", "oms": "OMS Europa, Environmental Noise Guidelines (2018) via QMUL/ISGlobal", "nbr": "ABNT NBR 10.151:2019 via Pesquisa FAPESP nº 341 (jul/2024)", "isa": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "rede": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "urg": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "ibge": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "mino": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP", "rede26": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "vig": "Vigitel 2006–2024 (Ministério da Saúde), divulgado em 2026; capitais reunidas, via Conexão Tocantins (27/10/2026)", "mapa": "Prefeitura de SP (Lei 16.499/2016, Decreto 58.737/2019, acordo IPT 24/04/2025) e Pesquisa FAPESP 341"}, "catalogo": [{"bloco": "Referência acústica", "indicador": "Limite OMS para tráfego rodoviário, dia (Lden)", "valor": 53, "unidade": "dB", "periodo": "2018", "fonte": "Resumo Executivo EcoSom SUS (FMU 2026.2)", "tipo": "documento", "nota": "No documento aparece como 'durante o dia'; a OMS define Lden (média dia-tarde-noite com penalidades)."}, {"bloco": "Referência acústica", "indicador": "Limite OMS para tráfego rodoviário, noite (Lnight)", "valor": 45, "unidade": "dB", "periodo": "2018", "fonte": "Resumo Executivo EcoSom SUS (FMU 2026.2)", "tipo": "documento", "nota": ""}, {"bloco": "Referência acústica", "indicador": "OMS: nível com +5% de risco de certas cardiopatias", "valor": 59.3, "unidade": "dB", "periodo": "2018", "fonte": "OMS Europa, Environmental Noise Guidelines (2018) via QMUL/ISGlobal", "tipo": "público", "nota": ""}, {"bloco": "Referência acústica", "indicador": "NBR 10.151, dia, área mista residencial", "valor": 55, "unidade": "dB", "periodo": "2019", "fonte": "ABNT NBR 10.151:2019 via Pesquisa FAPESP nº 341 (jul/2024)", "tipo": "público", "nota": "Métrica da norma (LAeq) difere da Lden da OMS."}, {"bloco": "Referência acústica", "indicador": "NBR 10.151, noite, área mista residencial", "valor": 50, "unidade": "dB", "periodo": "2019", "fonte": "ABNT NBR 10.151:2019 via Pesquisa FAPESP nº 341 (jul/2024)", "tipo": "público", "nota": ""}, {"bloco": "Ruído medido", "indicador": "Minhocão com viaduto aberto", "valor": "69–76", "unidade": "dB", "periodo": "abr/2019", "fonte": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP", "tipo": "público", "nota": "Medição pontual; métrica não informada na fonte."}, {"bloco": "Ruído estimado", "indicador": "Minhocão com viaduto fechado", "valor": "59–70", "unidade": "dB", "periodo": "abr/2019", "fonte": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP", "tipo": "público", "nota": "Estimativa, não medição."}, {"bloco": "Cardiovascular", "indicador": "Hipertensão diagnosticada, adultos (20+), cidade de SP", "valor": 17.0, "unidade": "%", "periodo": "2003", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Diabetes diagnosticado, adultos (20+), cidade de SP", "valor": 4.7, "unidade": "%", "periodo": "2003", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Hipertensão diagnosticada, adultos (20+), cidade de SP", "valor": 21.7, "unidade": "%", "periodo": "2008", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Diabetes diagnosticado, adultos (20+), cidade de SP", "valor": 6.4, "unidade": "%", "periodo": "2008", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Hipertensão diagnosticada, adultos (20+), cidade de SP", "valor": 23.2, "unidade": "%", "periodo": "2015", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Diabetes diagnosticado, adultos (20+), cidade de SP", "valor": 7.7, "unidade": "%", "periodo": "2015", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Hipertensão diagnosticada, adultos (20+), cidade de SP", "valor": 26.3, "unidade": "%", "periodo": "2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Diabetes diagnosticado, adultos (20+), cidade de SP", "valor": 11.0, "unidade": "%", "periodo": "2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Hipertensão em maiores de 60 anos", "valor": 58.5, "unidade": "%", "periodo": "2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Diabetes em maiores de 60 anos", "valor": 28.2, "unidade": "%", "periodo": "2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Internações por infarto (IAM), capital", "valor": 13800, "unidade": "pessoas", "periodo": "jan/2023–jul/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Internações por AVC (isquêmico ou hemorrágico), capital", "valor": 9394, "unidade": "pessoas", "periodo": "jan/2023–jul/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Pacientes com trombólise no IAM", "valor": 4428, "unidade": "pacientes", "periodo": "2023–jun/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Cardiovascular", "indicador": "Pacientes com trombólise no AVC isquêmico", "valor": 1306, "unidade": "pacientes", "periodo": "2023–jun/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "UBS", "valor": 451, "unidade": "unidades", "periodo": "2016", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "UPA", "valor": 3, "unidade": "unidades", "periodo": "2016", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "UBS", "valor": 479, "unidade": "unidades", "periodo": "2025", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "CAPS", "valor": 103, "unidade": "unidades", "periodo": "2025", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "UPA", "valor": 34, "unidade": "unidades", "periodo": "2025", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "Hospitais municipais", "valor": 27, "unidade": "unidades", "periodo": "2025", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "Estabelecimentos de saúde (total)", "valor": 1056, "unidade": "unidades", "periodo": "2025", "fonte": "SMS-SP, 'SUS 35 anos: capital entrega saúde em grandes números' (12/09/2025)", "tipo": "público", "nota": ""}, {"bloco": "Rede SUS", "indicador": "UBS", "valor": 484, "unidade": "unidades", "periodo": "ago/2026", "fonte": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "tipo": "público", "nota": "Preliminar, sujeito a revisão."}, {"bloco": "Rede SUS", "indicador": "CAPS", "valor": 105, "unidade": "unidades", "periodo": "ago/2026", "fonte": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "tipo": "público", "nota": "Preliminar, sujeito a revisão."}, {"bloco": "Rede SUS", "indicador": "UPA", "valor": 35, "unidade": "unidades", "periodo": "ago/2026", "fonte": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "tipo": "público", "nota": "Preliminar, sujeito a revisão."}, {"bloco": "Rede SUS", "indicador": "Hospitais municipais", "valor": 26, "unidade": "unidades", "periodo": "ago/2026", "fonte": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "tipo": "público", "nota": "Preliminar; eram 27 em 2025."}, {"bloco": "Rede SUS", "indicador": "Estabelecimentos de saúde (total)", "valor": 1064, "unidade": "unidades", "periodo": "ago/2026", "fonte": "SMS-SP, Estabelecimentos de saúde por CRS, agosto/2026 (dados preliminares, 16/09/2026)", "tipo": "público", "nota": "Preliminar, sujeito a revisão."}, {"bloco": "Cardiovascular", "indicador": "Hipertensão em adultos, capitais brasileiras reunidas", "valor": 29.7, "unidade": "%", "periodo": "2024", "fonte": "Vigitel 2006–2024 (Ministério da Saúde), divulgado em 2026; capitais reunidas, via Conexão Tocantins (27/10/2026)", "tipo": "público", "nota": "Não é só São Paulo; população de 18 anos ou mais."}, {"bloco": "Cardiovascular", "indicador": "Hipertensão em adultos, capitais brasileiras reunidas", "valor": 22.6, "unidade": "%", "periodo": "2006", "fonte": "Vigitel 2006–2024 (Ministério da Saúde), divulgado em 2026; capitais reunidas, via Conexão Tocantins (27/10/2026)", "tipo": "público", "nota": "Não é só São Paulo; população de 18 anos ou mais."}, {"bloco": "TEA", "indicador": "Pessoas diagnosticadas com autismo, Brasil", "valor": 2400000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,2% da população."}, {"bloco": "TEA", "indicador": "Homens diagnosticados", "valor": 1400000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,5% dos homens."}, {"bloco": "TEA", "indicador": "Mulheres diagnosticadas", "valor": 1000000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "0,9% das mulheres."}, {"bloco": "TEA", "indicador": "Prevalência na faixa 0–4 anos", "valor": 2.1, "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Prevalência na faixa 5–9 anos", "valor": 2.6, "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Prevalência na faixa 10–14 anos", "valor": 1.9, "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Prevalência na faixa 15–19 anos", "valor": 1.3, "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Prevalência nas demais faixas (20+)", "valor": "0,8–1,0", "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "A fonte agrega as demais faixas em um intervalo."}, {"bloco": "TEA", "indicador": "Prevalência 0–4 anos: meninos / meninas", "valor": "2,9 / 1,2", "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Prevalência 5–9 anos: meninos / meninas", "valor": "3,8 / 1,3", "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": ""}, {"bloco": "TEA", "indicador": "Autismo, região Sudeste", "valor": 1000000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "'Pouco mais de 1 milhão' na fonte; usado 1.000.000."}, {"bloco": "TEA", "indicador": "Autismo, região Nordeste", "valor": 633000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,2% da população da região."}, {"bloco": "TEA", "indicador": "Autismo, região Sul", "valor": 348400, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,2% da população da região."}, {"bloco": "TEA", "indicador": "Autismo, região Norte", "valor": 202000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,2% da população da região."}, {"bloco": "TEA", "indicador": "Autismo, região Centro-Oeste", "valor": 180000, "unidade": "pessoas", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "público", "nota": "1,1% da população da região."}, {"bloco": "Derivado", "indicador": "Variação da hipertensão 2003→2024", "valor": 9.3, "unidade": "p.p.", "periodo": "2003–2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "derivado", "nota": "+54.7% sobre o valor inicial."}, {"bloco": "Derivado", "indicador": "Variação do diabetes 2003→2024", "valor": 6.3, "unidade": "p.p.", "periodo": "2003–2024", "fonte": "ISA Capital 2024 (CEInfo/SMS-SP + FSP-USP), Prefeitura de SP", "tipo": "derivado", "nota": "+134.0% sobre o valor inicial."}, {"bloco": "Derivado", "indicador": "Internações IAM + AVC", "valor": 23194, "unidade": "pessoas", "periodo": "jan/2023–jul/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "derivado", "nota": "Soma dos dois valores públicos."}, {"bloco": "Derivado", "indicador": "Média mensal de internações IAM + AVC", "valor": 748, "unidade": "pessoas/mês", "periodo": "31 meses", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "derivado", "nota": "Total ÷ 31 meses; é média, não série mensal."}, {"bloco": "Derivado", "indicador": "Participação do IAM nas internações IAM+AVC", "valor": 59.5, "unidade": "%", "periodo": "jan/2023–jul/2025", "fonte": "SMS-SP/CEInfo, protocolos de infarto e AVC (18/09/2025)", "tipo": "derivado", "nota": ""}, {"bloco": "Derivado", "indicador": "Crianças e jovens (0–19) entre os diagnosticados com autismo", "valor": 46, "unidade": "%", "periodo": "2022", "fonte": "IBGE, Censo Demográfico 2022 (autismo), Agência de Notícias", "tipo": "derivado", "nota": "1,1 mi ÷ 2,4 mi, valores arredondados pela fonte."}, {"bloco": "Derivado", "indicador": "Minhocão aberto acima do limite OMS de 53 dB", "valor": "16 a 23", "unidade": "dB", "periodo": "2019", "fonte": "SMDU/Pro Acústica, estudo do Minhocão (abr/2019), via Gestão Urbana SP", "tipo": "derivado", "nota": "Comparação indicativa: métricas podem diferir."}], "log": ["OK TEA: homens + mulheres = total — 1,4 mi + 1,0 mi = 2,4 mi", "OK TEA: soma das regiões vs total — soma=2,363,400 vs 2,400,000 (diferença 1.5%: Sudeste é 'pouco mais de 1 milhão' e há arredondamento)", "OK ISA: séries com mesmo nº de pontos", "OK ISA: anos em ordem crescente", "OK Minhocão: lo <= hi", "OK Faixas TEA: 0–4 a 15–19 sem ausentes na coluna total", "OK Rede: séries com mesmo nº de pontos", "OK Catálogo: nenhum valor vazio — 57 linhas"]};
+</script>
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const NS='http://www.w3.org/2000/svg';
+function S(tag,attrs,parent){const n=document.createElementNS(NS,tag);for(const k in attrs){if(k==='text')n.textContent=attrs[k];else n.setAttribute(k,attrs[k]);}if(parent)parent.appendChild(n);return n;}
+const nf=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+const pc=n=>nf(n,1)+'%';
+const mil=n=>n>=1e6?nf(n/1e6,1)+' mi':nf(n/1e3,n%1000?1:0)+' mil';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D2=D.derivados;
+const AF=D.anosFiltro;
+const state={eixo:'all',de:AF[0],ate:AF[AF.length-1],reg:'all',sex:'all',faixa:'all',med:'hipertensao',dist:null};
+const colors={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)'};
+
+/* ---------- tooltip ---------- */
+const tip=$('#tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.hidden=false;const r=tip.getBoundingClientRect();let tx=x+14,ty=y+14;if(tx+r.width>innerWidth-8)tx=x-r.width-14;if(ty+r.height>innerHeight-8)ty=y-r.height-14;tip.style.transform='translate('+Math.max(8,tx)+'px,'+Math.max(8,ty)+'px)';}
+function hideTip(){tip.hidden=true;}
+function bindTip(node,fn){
+  node.addEventListener('pointerenter',e=>showTip(fn(),e.clientX,e.clientY));
+  node.addEventListener('pointermove',e=>showTip(fn(),e.clientX,e.clientY));
+  node.addEventListener('pointerleave',hideTip);
+  node.setAttribute('tabindex','0');
+  node.addEventListener('focus',()=>{const r=node.getBoundingClientRect();showTip(fn(),r.left+r.width/2,r.top);});
+  node.addEventListener('blur',hideTip);
+}
+const tipRow=(c,n,v)=>'<div class="row"><i style="background:'+c+'"></i><span>'+esc(n)+': <b>'+v+'</b></span></div>';
+
+/* ---------- helpers de desenho ---------- */
+function rrR(x,y,w,h,r){r=Math.min(r,w,h/2);return 'M'+x+' '+y+'H'+(x+w-r)+'Q'+(x+w)+' '+y+' '+(x+w)+' '+(y+r)+'V'+(y+h-r)+'Q'+(x+w)+' '+(y+h)+' '+(x+w-r)+' '+(y+h)+'H'+x+'Z';}
+function rrT(x,y,w,h,r){r=Math.min(r,w/2,h);return 'M'+x+' '+(y+h)+'V'+(y+r)+'Q'+x+' '+y+' '+(x+r)+' '+y+'H'+(x+w-r)+'Q'+(x+w)+' '+y+' '+(x+w)+' '+(y+r)+'V'+(y+h)+'Z';}
+function niceMax(v,step){return Math.ceil(v/step)*step;}
+function mkSvg(box,W,H,aria){box.innerHTML='';return S('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,role:'img','aria-label':aria||''},box);}
+const txt=(p,x,y,t,o)=>S('text',Object.assign({x:x,y:y,text:t,'font-size':12,style:'fill:var(--ink2)'},o||{}),p);
+
+/* ---------- linha ---------- */
+function lineChart(box,o){
+  const W=Math.max(280,box.clientWidth),H=W<480?250:300;
+  const m={t:14,r:W<480?86:104,b:30,l:38};
+  const s=mkSvg(box,W,H,o.aria),iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const x0=o.xs[0],x1=o.xs[o.xs.length-1];
+  const X=v=>x1===x0?m.l+iw/2:m.l+(v-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(v/o.yMax)*ih;
+  for(let t=0;t<=o.yMax;t+=o.yStep){S('line',{x1:m.l,x2:m.l+iw,y1:Y(t),y2:Y(t),style:'stroke:var(--grid)'},s);txt(s,m.l-8,Y(t)+4,t+'%',{'text-anchor':'end','font-size':11.5});}
+  o.xs.forEach(v=>txt(s,X(v),H-8,v,{'text-anchor':'middle'}));
+  const cross=S('line',{y1:m.t,y2:m.t+ih,style:'stroke:var(--ink2);stroke-dasharray:3 3;display:none'},s);
+  const tipAt=i=>{let h='<b>'+o.xs[i]+'</b>';o.series.forEach(se=>{h+=tipRow(se.color,se.name,pc(se.vals[i]));if(i>0)h+='<div class="m" style="margin-left:16px">'+(se.vals[i]-se.vals[i-1]>=0?'+':'')+nf(se.vals[i]-se.vals[i-1],1)+' p.p. desde '+o.xs[i-1]+'</div>';});return h;};
+  const ov=S('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent'},s);
+  ov.addEventListener('pointermove',e=>{const r=s.getBoundingClientRect();const px=(e.clientX-r.left)*(W/r.width);let b=0,bd=1e9;o.xs.forEach((v,i)=>{const d=Math.abs(X(v)-px);if(d<bd){bd=d;b=i;}});cross.setAttribute('x1',X(o.xs[b]));cross.setAttribute('x2',X(o.xs[b]));cross.style.display='';showTip(tipAt(b),e.clientX,e.clientY);});
+  ov.addEventListener('pointerleave',()=>{cross.style.display='none';hideTip();});
+  o.series.forEach(se=>{
+    if(o.xs.length>1){S('path',{d:'M'+o.xs.map((v,i)=>X(v)+' '+Y(se.vals[i])).join('L'),fill:'none',style:'stroke:'+se.color,'stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'},s);}
+    o.xs.forEach((v,i)=>{const c=S('circle',{cx:X(v),cy:Y(se.vals[i]),r:5,style:'fill:'+se.color+';stroke:var(--surface);stroke-width:2'},s);bindTip(c,()=>tipAt(i));});
+    const li=o.xs.length-1;
+    txt(s,X(o.xs[li])+10,Y(se.vals[li])-1,pc(se.vals[li]),{'font-size':13,'font-weight':700,style:'fill:var(--ink)'});
+    txt(s,X(o.xs[li])+10,Y(se.vals[li])+14,se.name,{'font-size':12});
+  });
+}
+
+/* ---------- rosca ---------- */
+function donut(box,o){
+  box.innerHTML='';
+  const size=Math.min(210,Math.max(160,box.clientWidth));
+  const s=S('svg',{viewBox:'0 0 '+size+' '+size,width:size,height:size,role:'img','aria-label':o.aria,style:'display:block;margin:0 auto'},box);
+  const R=size/2-4,r=R-30,c=size/2,tot=o.items.reduce((a,b)=>a+b.value,0);
+  let a=-Math.PI/2;const gap=0.035;
+  const pt=(rad,ang)=>[c+rad*Math.cos(ang),c+rad*Math.sin(ang)];
+  o.items.forEach(it=>{
+    const sw=it.value/tot*Math.PI*2,a0=a+gap/2,a1=a+sw-gap/2,lg=(a1-a0)>Math.PI?1:0;
+    const p0=pt(R,a0),p1=pt(R,a1),p2=pt(r,a1),p3=pt(r,a0);
+    const d='M'+p0+'A'+R+' '+R+' 0 '+lg+' 1 '+p1+'L'+p2+'A'+r+' '+r+' 0 '+lg+' 0 '+p3+'Z';
+    const path=S('path',{d:d,style:'fill:'+it.color+';stroke:var(--surface);stroke-width:2'},s);
+    bindTip(path,()=>'<b>'+esc(it.name)+'</b><div>'+nf(it.value)+' '+(o.unit||'')+' ('+nf(it.value/tot*100,1)+'%)</div>'+(it.nota?'<div class="m">'+esc(it.nota)+'</div>':''));
+    a+=sw;
+  });
+  S('text',{x:c,y:c+(o.small?-2:4),'text-anchor':'middle','font-size':o.bigSize||26,'font-weight':700,style:'fill:var(--ink)',text:o.big},s);
+  if(o.small)S('text',{x:c,y:c+16,'text-anchor':'middle','font-size':12,style:'fill:var(--ink2)',text:o.small},s);
+}
+function legendList(el,items,fmt){el.innerHTML=items.map(it=>'<span><i style="background:'+it.color+'"></i>'+esc(it.name)+': <b>'+fmt(it)+'</b></span>').join('');}
+
+/* ---------- barras horizontais ---------- */
+function hbars(box,o){
+  const W=Math.max(240,box.clientWidth),rowH=o.rowH||44,m={t:4,r:o.rightPad||74,b:6,l:2};
+  const H=m.t+m.b+o.rows.length*rowH,s=mkSvg(box,W,H,o.aria),iw=W-m.l-m.r;
+  const max=o.max||niceMax(Math.max.apply(null,o.rows.map(r=>r.value)),o.step||1);
+  const X=v=>m.l+v/max*iw;
+  o.rows.forEach((r,i)=>{
+    const y=m.t+i*rowH;
+    const g=S('g',{style:'opacity:'+(r.dim?.38:1)},s);
+    txt(g,m.l,y+13,r.label,{'font-size':12.5,style:'fill:var(--ink)'});
+    const bw=Math.max(3,X(r.value)-m.l);
+    const bar=S('path',{d:rrR(m.l,y+20,bw,16,4),style:'fill:'+r.color},g);
+    if(r.tick!=null)S('rect',{x:X(r.tick)-1,y:y+16,width:2,height:24,style:'fill:var(--ink)'},g);
+    txt(g,m.l+bw+7,y+33,r.valText,{'font-size':13,'font-weight':700,style:'fill:var(--ink)'});
+    bindTip(g,()=>r.tipHtml);
+  });
+}
+
+/* ---------- barras verticais agrupadas ---------- */
+function vbars(box,o){
+  const W=Math.max(260,box.clientWidth),H=270,m={t:22,r:6,b:34,l:36};
+  const s=mkSvg(box,W,H,o.aria),iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const Y=v=>m.t+ih-v/o.yMax*ih;
+  for(let t=0;t<=o.yMax;t+=o.yStep){S('line',{x1:m.l,x2:m.l+iw,y1:Y(t),y2:Y(t),style:'stroke:var(--grid)'},s);txt(s,m.l-7,Y(t)+4,t+'%',{'text-anchor':'end','font-size':11.5});}
+  const gw=iw/o.groups.length;
+  o.groups.forEach((g,gi)=>{
+    const cx=m.l+gw*gi+gw/2;
+    txt(s,cx,H-12,g.label,{'text-anchor':'middle','font-size':12.5});
+    if(g.range){
+      const bw=Math.min(40,gw*.55),yy=Y(g.range[1]),hh=Y(g.range[0])-yy;
+      const rr=S('rect',{x:cx-bw/2,y:yy,width:bw,height:hh,rx:4,style:'fill:var(--s3);fill-opacity:.28;stroke:var(--s3);stroke-width:2;stroke-dasharray:4 3'},s);
+      bindTip(rr,()=>g.tipHtml);
+      txt(s,cx,yy-6,g.valText,{'text-anchor':'middle','font-size':12,'font-weight':700,style:'fill:var(--ink)'});
+      return;
+    }
+    const n=g.bars.length,bw=Math.min(40,gw*.62/n),gp=2,tw=n*bw+(n-1)*gp;
+    g.bars.forEach((b,bi)=>{
+      const x=cx-tw/2+bi*(bw+gp),y=Y(b.v);
+      const p=S('path',{d:rrT(x,y,bw,m.t+ih-y,4),style:'fill:'+b.color},s);
+      bindTip(p,()=>g.tipHtml);
+      txt(s,x+bw/2,y-6,pc(b.v),{'text-anchor':'middle','font-size':12,'font-weight':700,style:'fill:var(--ink)'});
+    });
+  });
+}
+
+/* ---------- escada de dB ---------- */
+function ladder(box,o){
+  const W=Math.max(280,box.clientWidth),rowH=46,m={t:34,r:70,b:28,l:4};
+  const H=m.t+m.b+o.rows.length*rowH,s=mkSvg(box,W,H,o.aria),iw=W-m.l-m.r;
+  const d0=30,d1=80,X=v=>m.l+(v-d0)/(d1-d0)*iw;
+  for(let t=d0;t<=d1;t+=10){S('line',{x1:X(t),x2:X(t),y1:m.t-4,y2:H-m.b,style:'stroke:var(--grid)'},s);txt(s,X(t),H-8,t+' dB',{'text-anchor':'middle','font-size':11.5});}
+  o.lims.forEach((l,i)=>{S('line',{x1:X(l.v),x2:X(l.v),y1:m.t-8,y2:H-m.b,style:'stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4'},s);
+    txt(s,X(l.v)+(l.v===53&&o.lims.length>1?5:-5),14+(l.v===53&&o.lims.length>1?0:0),l.t,{'text-anchor':l.v===53&&o.lims.length>1?'start':'end','font-size':12,'font-weight':600,style:'fill:var(--ink)'});});
+  o.rows.forEach((r,i)=>{
+    const y=m.t+i*rowH,g=S('g',{},s);
+    txt(g,m.l,y+11,r.label,{'font-size':12.5,style:'fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round'});
+    const cy=y+30,col=r.tipo==='referência'?'var(--s1)':'var(--s2)';
+    if(r.lo===r.hi){
+      S('line',{x1:X(d0),x2:X(r.lo),y1:cy,y2:cy,style:'stroke:'+col+';stroke-width:2;stroke-opacity:.45'},g);
+      S('circle',{cx:X(r.lo),cy:cy,r:6.5,style:'fill:'+col+';stroke:var(--surface);stroke-width:2'},g);
+      txt(g,X(r.lo)+12,cy+4,nf(r.lo,r.lo%1?1:0)+' dB',{'font-size':13,'font-weight':700,style:'fill:var(--ink)'});
+    }else{
+      const est=r.tipo==='estimado';
+      S('rect',{x:X(r.lo),y:cy-7,width:X(r.hi)-X(r.lo),height:14,rx:7,style:'fill:'+col+';fill-opacity:'+(est?.28:1)+';stroke:'+col+';stroke-width:'+(est?2:0)+';stroke-dasharray:'+(est?'4 3':'0')},g);
+      txt(g,X(r.hi)+8,cy+4,r.lo+'–'+r.hi+' dB',{'font-size':13,'font-weight':700,style:'fill:var(--ink)'});
+    }
+    bindTip(g,()=>'<b>'+esc(r.label)+'</b><div>'+(r.lo===r.hi?nf(r.lo,r.lo%1?1:0):r.lo+'–'+r.hi)+' dB · '+r.tipo+'</div><div class="m">'+esc(r.fonte)+'</div>');
+  });
+}
+
+/* ---------- renderização por estado ---------- */
+const reg=D.tea.regiao;
+function redeIdx(){const r=D.rede.anos.map((a,i)=>i).filter(i=>D.rede.anos[i]>=state.de&&D.rede.anos[i]<=state.ate);return r.length?r[r.length-1]:-1;}
+function renderKpis(){
+  const ii=D.isa.anos.map((a,i)=>i).filter(i=>D.isa.anos[i]>=state.de&&D.isa.anos[i]<=state.ate);
+  const yi=ii.length?ii[ii.length-1]:-1,y0=ii.length?ii[0]:-1;
+  const hv=yi>=0?D.isa.hipertensao[yi]:null,h0=yi>=0?D.isa.hipertensao[y0]:null;
+  const ri=redeIdx(),R=D.rede,gv=v=>v==null?'—':nf(v);
+  let tea,teaSub;
+  if(state.reg!=='all'){const r=reg.find(x=>x.k===state.reg);tea=(r.aprox?'≈ ':'')+mil(r.n);teaSub='<b>'+pc(r.p).replace('.',',')+'</b> da população do '+r.k+(r.aprox?' · "pouco mais de 1 milhão" na fonte':'')+' · Censo 2022';}
+  else if(state.sex!=='all'){const x=D.tea.sexo[state.sex];tea=mil(x.n);teaSub='<b>'+pc(x.p)+'</b> '+(state.sex==='H'?'dos homens':'das mulheres')+' do Brasil · Censo 2022';}
+  else{tea=mil(D.tea.total);teaSub='<b>'+pc(D.tea.pct)+'</b> da população brasileira · Censo 2022';}
+  const lim=state.faixa==='dia'?'53':state.faixa==='noite'?'45':'53 · 45';
+  const limSub=state.faixa==='dia'?'Lden, tráfego rodoviário (OMS 2018)':state.faixa==='noite'?'Lnight, tráfego rodoviário (OMS 2018)':'<b>dia</b> (Lden) · <b>noite</b> (Lnight), OMS 2018';
+  const k=[
+    {e:'cardio',c:'var(--s1)',l:'Hipertensão em adultos, cidade de SP'+(yi>=0?' ('+D.isa.anos[yi]+')':''),v:hv==null?'—':nf(hv,1)+'<small>%</small>',d:hv==null?'Sem pesquisa ISA no período. A última é de 2024.':(y0<yi?'<b>+'+nf(hv-h0,1)+' p.p.</b> desde '+D.isa.anos[y0]+' ('+nf(h0,1)+'%)':'Pesquisa ISA Capital, '+D.isa.anos[yi])+(state.ate>2024?' · não há dado de 2025 e 2026':'')},
+    {e:'cardio',c:'var(--s1)',l:'Pessoas internadas por infarto ou AVC',v:nf(D2.urg_total),d:'jan/2023 a jul/2025 · média de <b>'+nf(D2.urg_mes)+'/mês</b> (cálculo nosso)'},
+    {e:'tea',c:'var(--s2)',l:'Pessoas com diagnóstico de autismo',v:tea,d:teaSub},
+    {e:'ruido',c:'var(--s3)',l:'Limites de ruído que o projeto adota',v:lim+'<small>dB</small>',d:limSub},
+    {e:'rede',c:'var(--s3)',l:'Unidades Básicas de Saúde (UBS)'+(ri>=0?' ('+R.anos[ri]+(R.prelim[ri]?', prelim.':'')+')':''),v:ri<0?'—':nf(R.UBS[ri]),d:ri<0?'Sem dado da rede no período.':'<b>'+gv(R.CAPS[ri])+'</b> CAPS · <b>'+gv(R.UPA[ri])+'</b> UPA · <b>'+gv(R.HOSP[ri])+'</b> hospitais'},
+  ];
+  $('#kpis').innerHTML=k.map(x=>'<div class="kpi" data-eixo="'+x.e+'" style="--k:'+x.c+'"><div class="l">'+x.l+'</div><div class="v">'+x.v+'</div><div class="d">'+x.d+'</div></div>').join('');
+}
+function renderIsa(){
+  const idx=D.isa.anos.map((a,i)=>i).filter(i=>D.isa.anos[i]>=state.de&&D.isa.anos[i]<=state.ate);
+  const xs=idx.map(i=>D.isa.anos[i]);
+  if(!xs.length){$('#chIsa').innerHTML='<div class="empty">A pesquisa ISA Capital tem dados de 2003, 2008, 2015 e 2024. Amplie o período para ver a série.</div>';$('#lgIsa').innerHTML='';$('#subIsa').textContent='Nenhum ano da pesquisa dentro do período escolhido.';return;}
+  $('#subIsa').textContent='Adultos (20 anos ou mais) com diagnóstico referido, '+(xs.length>1?xs[0]+' a '+xs[xs.length-1]:xs[0])+'. Entre maiores de 60 anos, 58,5% têm hipertensão (2024).'+(state.ate>2024?' Não há dado de hipertensão para 2025 e 2026: a pesquisa mais recente é de 2024.':'');
+  lineChart($('#chIsa'),{xs:xs,yMax:30,yStep:10,aria:'Hipertensão e diabetes em adultos da cidade de São Paulo',
+    series:[{name:'Hipertensão',color:'var(--s1)',vals:idx.map(i=>D.isa.hipertensao[i])},{name:'Diabetes',color:'var(--s2)',vals:idx.map(i=>D.isa.diabetes[i])}]});
+  $('#lgIsa').innerHTML='<span><i style="background:var(--s1)"></i>Hipertensão</span><span><i style="background:var(--s2)"></i>Diabetes</span>';
+}
+function renderUrg(){
+  const u=D.urg;
+  donut($('#chUrg'),{aria:'Internações por infarto e AVC',unit:'pessoas',big:nf(D2.urg_total),bigSize:24,small:'internadas',items:[
+    {name:'Infarto (IAM)',value:u.iam,color:'var(--s1)',nota:u.trIam?nf(u.trIam)+' receberam trombólise (2023 a jun/2025)':''},
+    {name:'AVC',value:u.avc,color:'var(--s2)',nota:nf(u.trAvc)+' com AVC isquêmico receberam trombólise (2023 a jun/2025)'}]});
+  legendList($('#lgUrg'),[{name:'Infarto (IAM)',color:'var(--s1)',v:u.iam},{name:'AVC',color:'var(--s2)',v:u.avc}],it=>nf(it.v)+' ('+nf(it.v/D2.urg_total*100,1)+'%)');
+}
+function renderRuido(){
+  const f=state.faixa;
+  const rows=D.ruido.filter(r=>f==='all'||r.per===f||r.per==='ambos').sort((a,b)=>a.lo-b.lo||a.hi-b.hi);
+  const lims=f==='dia'?[{v:53,t:'Limite OMS dia: 53'}]:f==='noite'?[{v:45,t:'Limite OMS noite: 45'}]:[{v:45,t:'OMS noite: 45'},{v:53,t:'OMS dia: 53'}];
+  $('#subRuido').textContent='Referências normativas ('+(f==='dia'?'dia':f==='noite'?'noite':'dia e noite')+') frente ao que foi medido ou estimado no Minhocão, em 2019.';
+  ladder($('#chRuido'),{rows:rows,lims:lims,aria:'Escada de níveis de ruído em decibéis'});
+  $('#lgRuido').innerHTML='<span><i style="background:var(--s1)"></i>Referência normativa</span><span><i style="background:var(--s2)"></i>Medido</span><span><i class="dash"></i>Estimado</span>';
+}
+function renderRede(){
+  const ri=redeIdx(),R=D.rede;
+  if(ri<0){$('#chRede').innerHTML='<div class="empty">Há dados da rede para 2016, 2025 e 2026. Amplie o período.</div>';$('#subRede').textContent='Nenhum ano com dado dentro do período escolhido.';return;}
+  $('#subRede').textContent='Unidades por tipo em '+R.anos[ri]+(R.prelim[ri]?' (dados preliminares da SMS-SP, agosto)':'')+'.';
+  const items=[['UBS',R.UBS],['CAPS',R.CAPS],['UPA',R.UPA],['Hospitais municipais',R.HOSP]];
+  const rows=items.map(it=>{const k=it[0],arr=it[1],v=arr[ri];
+    const hist=R.anos.map((a,i)=>'<div'+(i===ri?' style="font-weight:700"':'')+'>'+a+': '+(arr[i]==null?'sem dado':nf(arr[i]))+(R.prelim[i]?' (prelim.)':'')+'</div>').join('');
+    return {label:k,value:v==null?0:v,color:'var(--s3)',tick:(ri!==0&&arr[0]!=null)?arr[0]:null,valText:v==null?'sem dado':nf(v),tipHtml:'<b>'+esc(k)+'</b>'+hist};});
+  hbars($('#chRede'),{rows:rows,max:500,aria:'Unidades da rede municipal de saúde'});
+}
+function renderTea(){
+  const t=D.tea,H=state.sex==='H',M=state.sex==='M',R=state.reg!=='all';
+  // idade
+  let groups;
+  const bar=(f,v,c,n,tx)=>({label:f,bars:[{v:v,color:c,name:n}],tipHtml:tx});
+  if(H||M){const k=H?'H':'M',c=H?'var(--s1)':'var(--s2)',n=H?'Homens':'Mulheres';
+    groups=t.idade.filter(i=>i[k]!=null).map(i=>bar(i.f+' anos',i[k],c,n,'<b>'+i.f+' anos</b>'+tipRow(c,n,pc(i[k]))+tipRow('var(--ink2)','Total da faixa',pc(i.t))));
+    $('#subIdade').textContent='Só as faixas de 0 a 4 e de 5 a 9 anos têm recorte por sexo na fonte. Prevalência entre '+n.toLowerCase()+', Brasil.';
+    $('#lgIdade').innerHTML='<span><i style="background:'+c+'"></i>'+n+'</span>';
+  }else{
+    groups=t.idade.map(i=>bar(i.f+' anos',i.t,'var(--s3)','Total','<b>'+i.f+' anos</b>'+tipRow('var(--s3)','Prevalência',pc(i.t))+(i.H!=null?'<div class="m">Meninos '+pc(i.H)+' · meninas '+pc(i.M)+'</div>':'')));
+    groups.push({label:'20+ anos',range:t.demais,valText:nf(t.demais[0],1)+'–'+nf(t.demais[1],1)+'%',tipHtml:'<b>20 anos ou mais</b><div>0,8% a 1,0% (a fonte agrega estas faixas em um intervalo)</div>'});
+    $('#subIdade').textContent='Prevalência na população do Brasil, Censo 2022'+(R?' (dado nacional: a fonte não traz faixa etária por região).':'. A prevalência é mais alta na infância.');
+    $('#lgIdade').innerHTML='<span><i style="background:var(--s3)"></i>Total</span><span><i class="dash" style="border-color:var(--s3)"></i>Intervalo agregado</span>';
+  }
+  vbars($('#chIdade'),{groups:groups,yMax:4,yStep:1,aria:'Prevalência de autismo por faixa etária'});
+  // região
+  const rows=t.regiao.map(r=>({label:r.k,value:r.n/1000,color:'var(--s3)',dim:R&&state.reg!==r.k,valText:(r.aprox?'≈ ':'')+mil(r.n),
+    tipHtml:'<b>'+esc(r.k)+'</b><div>'+(r.aprox?'pouco mais de 1 milhão':nf(r.n)+' pessoas')+'</div><div>'+pc(r.p)+' da população da região</div>'}));
+  hbars($('#chReg'),{rows:rows,max:1200,rightPad:82,rowH:46,aria:'Pessoas com autismo por região'});
+  $('#subReg').textContent=H||M?'Sem recorte por sexo nesta fonte; valores totais por região.':(R?'Região selecionada em destaque.':'Número de pessoas diagnosticadas.');
+  // sexo
+  donut($('#chSexo'),{aria:'Autismo por sexo',unit:'pessoas',big:mil(t.total),bigSize:22,small:'no Brasil',items:[
+    {name:'Homens',value:t.sexo.H.n,color:'var(--s1)',nota:pc(t.sexo.H.p)+' dos homens'},{name:'Mulheres',value:t.sexo.M.n,color:'var(--s2)',nota:pc(t.sexo.M.p)+' das mulheres'}]});
+  legendList($('#lgSexo'),[{name:'Homens',color:'var(--s1)',v:t.sexo.H},{name:'Mulheres',color:'var(--s2)',v:t.sexo.M}],it=>mil(it.v.n)+' ('+pc(it.v.p)+')');
+  $('#subSexo').textContent=R?'Dado nacional: a fonte não cruza sexo e região.':'Valores arredondados pela fonte.';
+}
+function renderIns(){
+  const lacuna=n=>'lac';
+  const items=[
+   {t:'Dado público',h:'Hipertensão subiu '+nf(D2.hip_var_pct,1)+'% e diabetes '+nf(D2.dia_var_pct,0)+'% entre adultos da capital em 21 anos.',p:'De 17,0% para 26,3% e de 4,7% para 11,0% (2003 a 2024). Entre maiores de 60 anos, 58,5% têm hipertensão, '+nf(D2.hip60_x,1)+' vezes a média adulta. O risco cardiovascular de base cresce, e o ruído é um fator a mais, não a causa única. Nas capitais brasileiras reunidas, o Vigitel 2024 (divulgado em 2026) registra 29,7%, contra 22,6% em 2006.',s:'ISA Capital 2024; Vigitel 2006–2024'},
+   {t:'Derivado',h:nf(D2.urg_total)+' pessoas foram internadas por infarto ou AVC em 31 meses, cerca de '+nf(D2.urg_mes)+' por mês.',p:'O infarto responde por '+nf(D2.iam_share,1)+'% (13.800) e o AVC por '+nf(D2.avc_share,1)+'% (9.394). A média mensal é cálculo nosso, não uma série mensal.',s:'SMS-SP/CEInfo, set/2025'},
+   {t:'Dado público',h:'O autismo se concentra na infância: '+D2.tea_0a19_pct+'% dos 2,4 milhões diagnosticados têm até 19 anos.',p:'Aos 5 a 9 anos a prevalência chega a 2,6%, de '+nf(D2.tea_5_9_vs_adult_lo,1)+' a '+nf(2.6/0.8,1)+' vezes a dos adultos. Entre meninos dessa faixa são 3,8%, contra 1,3% das meninas. O módulo de rotas precisa falar com cuidadores.',s:'IBGE, Censo 2022'},
+   {t:'Dado público',h:'No Minhocão aberto, 69 a 76 dB ficam '+D2.mino_acima_lo+' a '+D2.mino_acima_hi+' dB acima da referência de 53 dB da OMS.',p:'Fechada ao tráfego, a estimativa cai para 59 a 70 dB. É um único corredor, de 2019, e as métricas podem diferir; serve de ilustração, não de média da cidade.',s:'SMDU/Pro Acústica, 2019; OMS 2018'},
+   {t:'Lacuna',h:'O mapa de ruído municipal, base do Score de Risco Acústico, ainda não cobre a cidade.',p:'A Lei 16.499/2016 previa o mapa até 2023; o prazo foi para 2030. Em abril de 2025 a Prefeitura assinou acordo com o IPT, com entregas a partir de 2026 e conclusão em 2029. Até 22/11/2026 não localizei mapa nem camada Lden/Lnight publicados no GeoSampa.',s:'Prefeitura de SP; Pesquisa FAPESP 341',lac:true},
+  ];
+  $('#ins').innerHTML=items.map(i=>'<div class="in"><span class="tag'+(i.lac?' lac':'')+'">'+(i.lac?'▲ ':'')+i.t+'</span><h4>'+i.h+'</h4><p>'+i.p+' <span class="src">Fonte: '+i.s+'.</span></p></div>').join('');
+}
+function renderPront(){
+  const rows=[
+   ['ok','Disponível','Limites da OMS (53 e 45 dB)','No documento e na publicação da OMS.'],
+   ['no','Pendente','Mapa de ruído do GeoSampa (Lden e Lnight)','Lei de 2016; prazo estendido para 2030. Entregas do IPT previstas a partir de 2026; não localizei camada publicada.'],
+   ['no','Não carregado','Internações por distrito (DataSUS)','Só há totais da capital; o TABNET público não traz distrito de residência.'],
+   ['parc','Parcial','UBS e CAPS (CNES)','Totais públicos (ago/2026: 484 UBS, 105 CAPS); faltam as coordenadas.'],
+   ['parc','Não verificado','Áreas verdes e locais silenciosos (GeoSampa)','Camada citada no documento; não consultada.'],
+   ['parc','Incompleto','Prazos do plano de ação','As 4 tarefas estão com prazo “a definir”.'],
+  ];
+  const ic={ok:'✓',parc:'◐',no:'✕'};
+  $('#pront').innerHTML=rows.map(r=>'<tr><td style="width:128px"><span class="pill '+r[0]+'"><span aria-hidden="true">'+ic[r[0]]+'</span>'+r[1]+'</span></td><td><b>'+r[2]+'</b><span class="why">'+r[3]+'</span></td></tr>').join('');
+}
+function renderCat(){
+  $('#catN').textContent=D.catalogo.length+' linhas';
+  const cols=['bloco','indicador','valor','unidade','periodo','tipo','fonte','nota'],head=['Bloco','Indicador','Valor','Unidade','Período','Tipo','Fonte','Nota'];
+  $('#catT').innerHTML='<thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+D.catalogo.map(r=>'<tr>'+cols.map(c=>{let v=r[c];if(c==='valor'&&typeof v==='number')v=nf(v,v%1?1:0);return '<td'+(c==='valor'?' class="n"':'')+'>'+(c==='tipo'?'<span class="tp">'+esc(v)+'</span>':esc(v))+'</td>';}).join('')+'</tr>').join('')+'</tbody>';
+}
+/* ---------- distritos (CSV) ---------- */
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+function num(v){v=String(v).trim().replace(/\s/g,'');if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');v=v.replace(',','.');const n=Number(v);return isFinite(n)?n:NaN;}
+function parseCsv(text){
+  const lines=text.replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2)throw new Error('O arquivo precisa ter cabeçalho e ao menos uma linha.');
+  const sep=(lines[0].match(/;/g)||[]).length>=(lines[0].match(/,/g)||[]).length?';':',';
+  const head=lines[0].split(sep).map(norm),ix={d:head.indexOf('distrito'),h:head.indexOf('hipertensao'),i:head.indexOf('iam')};
+  if(ix.d<0||ix.h<0||ix.i<0)throw new Error('Cabeçalho esperado: distrito;hipertensao;iam. Encontrei: '+lines[0]);
+  const out=[];
+  lines.slice(1).forEach((l,n)=>{const c=l.split(sep);const h=num(c[ix.h]),i=num(c[ix.i]);if(!c[ix.d]||isNaN(h)||isNaN(i))throw new Error('Linha '+(n+2)+' inválida: '+l);out.push({distrito:c[ix.d].trim(),hipertensao:h,iam:i});});
+  return out;
+}
+function renderDist(){
+  const box=$('#dist');
+  if(!state.dist)return;
+  const k=state.med,rows=state.dist.slice().sort((a,b)=>b[k]-a[k]).slice(0,20);
+  const tot=state.dist.reduce((a,b)=>a+b[k],0);
+  box.innerHTML='<p class="sub" style="margin:0 0 6px">'+state.dist.length+' distritos carregados · total de '+nf(tot)+' internações ('+(k==='iam'?'infarto agudo':'hipertensão essencial')+') · 20 maiores abaixo. Dados do seu arquivo.</p><div class="chart" id="chDist"></div>';
+  hbars($('#chDist'),{rows:rows.map(r=>({label:r.distrito,value:r[k],color:k==='iam'?'var(--s2)':'var(--s1)',valText:nf(r[k]),tipHtml:'<b>'+esc(r.distrito)+'</b><div>Hipertensão: '+nf(r.hipertensao)+'</div><div>Infarto: '+nf(r.iam)+'</div>'})),rowH:38,aria:'Internações por distrito'});
+}
+function download(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+
+/* ---------- visibilidade por eixo ---------- */
+function applyEixo(){
+  $$('[data-eixo]').forEach(n=>{n.hidden=state.eixo!=='all'&&n.dataset.eixo!==state.eixo;});
+}
+function renderAll(){
+  renderKpis();applyEixo();hideTip();
+  renderIsa();renderUrg();renderRuido();renderRede();renderTea();renderDist();
+}
+
+/* ---------- onda decorativa ---------- */
+function wave(){
+  const w=$('#wave');w.setAttribute('viewBox','0 0 960 96');w.innerHTML='';
+  const n=96;
+  for(let i=0;i<n;i++){
+    const t=i/(n-1),amp=Math.pow(1-t,1.6),j=(Math.sin(i*1.7)+Math.sin(i*0.63+2)+Math.sin(i*2.9))/3;
+    const h=Math.max(3,(0.15+0.85*Math.abs(j))*80*amp+3);
+    S('rect',{x:i*10+1,y:96-h,width:6,height:h,rx:3,style:'fill:var(--wave);fill-opacity:'+(0.2+0.5*(1-t))},w);
+  }
+}
+
+/* ---------- controles ---------- */
+function init(){
+  // selects
+  const de=$('#fDe'),ate=$('#fAte');
+  AF.forEach(a=>{de.add(new Option(a,a));ate.add(new Option(a,a));});
+  de.value=state.de;ate.value=state.ate;
+  D.tea.regiao.forEach(r=>$('#fReg').add(new Option(r.k,r.k)));
+  $('#fEixo').onchange=e=>{state.eixo=e.target.value;renderAll();};
+  de.onchange=()=>{state.de=+de.value;if(state.de>state.ate){state.ate=state.de;ate.value=state.ate;}renderAll();};
+  ate.onchange=()=>{state.ate=+ate.value;if(state.ate<state.de){state.de=state.ate;de.value=state.de;}renderAll();};
+  $('#fReg').onchange=e=>{state.reg=e.target.value;if(state.reg!=='all'){state.sex='all';$('#fSex').value='all';}renderAll();};
+  $('#fSex').onchange=e=>{state.sex=e.target.value;if(state.sex!=='all'){state.reg='all';$('#fReg').value='all';}renderAll();};
+  $('#fFaixa').onchange=e=>{state.faixa=e.target.value;renderAll();};
+  $('#reset').onclick=()=>{Object.assign(state,{eixo:'all',de:AF[0],ate:AF[AF.length-1],reg:'all',sex:'all',faixa:'all'});
+    $('#fEixo').value='all';de.value=state.de;ate.value=state.ate;$('#fReg').value='all';$('#fSex').value='all';$('#fFaixa').value='all';renderAll();};
+  // tema
+  const root=document.documentElement;
+  const dark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  const sync=()=>{const d=dark();$('#theme').setAttribute('aria-pressed',d);$('#themeTxt').textContent=d?'Tema claro':'Tema escuro';};
+  try{const sv=localStorage.getItem('ecosom-theme');if(sv)root.dataset.theme=sv;}catch(e){}
+  sync();
+  $('#theme').onclick=()=>{const n=dark()?'light':'dark';root.dataset.theme=n;try{localStorage.setItem('ecosom-theme',n);}catch(e){}sync();};
+  // csv
+  $('#csvBtn').onclick=()=>$('#csv').click();
+  $('#csv').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{try{state.dist=parseCsv(rd.result);$('#cdist h3').textContent='Internações por distrito (DataSUS)';renderDist();}
+      catch(err){$('#dist').innerHTML='<div class="empty"><b>Não consegui ler o arquivo.</b><p class="err">'+esc(err.message)+'</p>Use as colunas <span class="code">distrito;hipertensao;iam</span>, com um distrito por linha.</div>';}};
+    rd.readAsText(f,'utf-8');e.target.value='';};
+  $('#csvModelo').onclick=()=>download('modelo_internacoes_distrito.csv','distrito;hipertensao;iam\n');
+  $('#fMed').onchange=e=>{state.med=e.target.value;renderDist();};
+  $('#catCsv').onclick=()=>{const cols=['bloco','indicador','valor','unidade','periodo','tipo','fonte','nota'];const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    download('ecosom_catalogo_dados.csv',[cols.join(';')].concat(D.catalogo.map(r=>cols.map(c=>q(r[c])).join(';'))).join('\n'));};
+  wave();renderIns();renderPront();renderCat();renderAll();
+  // responsivo
+  let raf=0,lw=innerWidth;
+  const ro=new ResizeObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{if(Math.abs(innerWidth-lw)>=1||true){lw=innerWidth;renderAll();}});});
+  $$('.chart').forEach(c=>ro.observe(c.parentElement));
+}
+init();
+})();
+</script>
+</body>
+</html>

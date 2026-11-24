@@ -1,0 +1,87 @@
+  </main>
+
+  <footer>
+    <p>Nenhum valor foi estimado. Números derivados (somas, médias e variações) estão marcados como tal e mostram o cálculo no catálogo.</p>
+    <p>Fontes: documento do projeto; OMS (2018); ABNT NBR 10.151 (2019); ISA Capital 2024 (SMS-SP e FSP-USP); SMS-SP (2025 e ago/2026); Vigitel 2006–2024 (Ministério da Saúde); IBGE, Censo 2022; SMDU e Pro Acústica (2019).</p>
+  </footer>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+const D = __DATA__;
+</script>
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const NS='http://www.w3.org/2000/svg';
+function S(tag,attrs,parent){const n=document.createElementNS(NS,tag);for(const k in attrs){if(k==='text')n.textContent=attrs[k];else n.setAttribute(k,attrs[k]);}if(parent)parent.appendChild(n);return n;}
+const nf=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+const pc=n=>nf(n,1)+'%';
+const mil=n=>n>=1e6?nf(n/1e6,1)+' mi':nf(n/1e3,n%1000?1:0)+' mil';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D2=D.derivados;
+const AF=D.anosFiltro;
+const state={eixo:'all',de:AF[0],ate:AF[AF.length-1],reg:'all',sex:'all',faixa:'all',med:'hipertensao',dist:null};
+const colors={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)'};
+
+/* ---------- tooltip ---------- */
+const tip=$('#tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.hidden=false;const r=tip.getBoundingClientRect();let tx=x+14,ty=y+14;if(tx+r.width>innerWidth-8)tx=x-r.width-14;if(ty+r.height>innerHeight-8)ty=y-r.height-14;tip.style.transform='translate('+Math.max(8,tx)+'px,'+Math.max(8,ty)+'px)';}
+function hideTip(){tip.hidden=true;}
+function bindTip(node,fn){
+  node.addEventListener('pointerenter',e=>showTip(fn(),e.clientX,e.clientY));
+  node.addEventListener('pointermove',e=>showTip(fn(),e.clientX,e.clientY));
+  node.addEventListener('pointerleave',hideTip);
+  node.setAttribute('tabindex','0');
+  node.addEventListener('focus',()=>{const r=node.getBoundingClientRect();showTip(fn(),r.left+r.width/2,r.top);});
+  node.addEventListener('blur',hideTip);
+}
+const tipRow=(c,n,v)=>'<div class="row"><i style="background:'+c+'"></i><span>'+esc(n)+': <b>'+v+'</b></span></div>';
+
+/* ---------- helpers de desenho ---------- */
+function rrR(x,y,w,h,r){r=Math.min(r,w,h/2);return 'M'+x+' '+y+'H'+(x+w-r)+'Q'+(x+w)+' '+y+' '+(x+w)+' '+(y+r)+'V'+(y+h-r)+'Q'+(x+w)+' '+(y+h)+' '+(x+w-r)+' '+(y+h)+'H'+x+'Z';}
+function rrT(x,y,w,h,r){r=Math.min(r,w/2,h);return 'M'+x+' '+(y+h)+'V'+(y+r)+'Q'+x+' '+y+' '+(x+r)+' '+y+'H'+(x+w-r)+'Q'+(x+w)+' '+y+' '+(x+w)+' '+(y+r)+'V'+(y+h)+'Z';}
+function niceMax(v,step){return Math.ceil(v/step)*step;}
+function mkSvg(box,W,H,aria){box.innerHTML='';return S('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,role:'img','aria-label':aria||''},box);}
+const txt=(p,x,y,t,o)=>S('text',Object.assign({x:x,y:y,text:t,'font-size':12,style:'fill:var(--ink2)'},o||{}),p);
+
+/* ---------- linha ---------- */
+function lineChart(box,o){
+  const W=Math.max(280,box.clientWidth),H=W<480?250:300;
+  const m={t:14,r:W<480?86:104,b:30,l:38};
+  const s=mkSvg(box,W,H,o.aria),iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const x0=o.xs[0],x1=o.xs[o.xs.length-1];
+  const X=v=>x1===x0?m.l+iw/2:m.l+(v-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(v/o.yMax)*ih;
+  for(let t=0;t<=o.yMax;t+=o.yStep){S('line',{x1:m.l,x2:m.l+iw,y1:Y(t),y2:Y(t),style:'stroke:var(--grid)'},s);txt(s,m.l-8,Y(t)+4,t+'%',{'text-anchor':'end','font-size':11.5});}
+  o.xs.forEach(v=>txt(s,X(v),H-8,v,{'text-anchor':'middle'}));
+  const cross=S('line',{y1:m.t,y2:m.t+ih,style:'stroke:var(--ink2);stroke-dasharray:3 3;display:none'},s);
+  const tipAt=i=>{let h='<b>'+o.xs[i]+'</b>';o.series.forEach(se=>{h+=tipRow(se.color,se.name,pc(se.vals[i]));if(i>0)h+='<div class="m" style="margin-left:16px">'+(se.vals[i]-se.vals[i-1]>=0?'+':'')+nf(se.vals[i]-se.vals[i-1],1)+' p.p. desde '+o.xs[i-1]+'</div>';});return h;};
+  const ov=S('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent'},s);
+  ov.addEventListener('pointermove',e=>{
+    const r=ov.getBoundingClientRect();
+    const x=e.clientX-r.left;
+    let i=0;
+    if(o.xs.length>1){
+      i=Math.round((x-m.l)/iw*(o.xs.length-1));
+      i=Math.max(0,Math.min(o.xs.length-1,i));
+    }
+    const px=X(o.xs[i]);
+    cross.setAttribute('x1',px);
+    cross.setAttribute('x2',px);
+    cross.style.display='';
+    showTip(tipAt(i),e.clientX,e.clientY);
+  });
+  ov.addEventListener('pointerleave',()=>{cross.style.display='none';hideTip();});
+
+  o.series.forEach(se=>{
+    let d='';
+    se.vals.forEach((v,i)=>{d+=(i?'L':'M')+X(o.xs[i])+' '+Y(v)+' ';});
+    S('path',{d:d.trim(),fill:'none',style:'stroke:'+se.color+';stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round'},s);
+    se.vals.forEach((v,i)=>{
+      const c=S('circle',{cx:X(o.xs[i]),cy:Y(v),r:3.5,style:'fill:'+se.color+';stroke:var(--panel);stroke-width:1.5'},s);
+      bindTip(c,()=>'<b>'+o.xs[i]+'</b>'+tipRow(se.color,se.name,pc(v)));
+    });
+  });
+}
+})();
